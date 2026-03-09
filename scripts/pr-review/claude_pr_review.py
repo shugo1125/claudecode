@@ -78,7 +78,7 @@ def review_with_claude(diff: str, api_key: str, was_truncated: bool) -> str:
             " 見えている範囲で高リスクな点を優先してレビューしてください。"
         )
 
-    model = os.environ.get("CLAUDE_MODEL", DEFAULT_MODEL)
+    model = os.environ.get("CLAUDE_MODEL") or DEFAULT_MODEL
     message = client.messages.create(
         model=model,
         max_tokens=4096,
@@ -156,7 +156,7 @@ def main():
 
     github_token = os.environ.get("GITHUB_TOKEN")
     anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
-    max_diff_chars = int(os.environ.get("MAX_DIFF_CHARS", DEFAULT_MAX_DIFF_CHARS))
+    max_diff_chars = int(os.environ.get("MAX_DIFF_CHARS") or DEFAULT_MAX_DIFF_CHARS)
 
     if not anthropic_key:
         print("Error: ANTHROPIC_API_KEY を設定してください", file=sys.stderr)
