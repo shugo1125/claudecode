@@ -1,0 +1,44 @@
+name: Claude PR Review
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  review:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install review dependencies
+        run: pip install -r scripts/pr-review/requirements.txt
+
+      - name: Review PR diff with Claude
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CLAUDE_MODEL: ${{ vars.CLAUDE_MODEL }}
+          MAX_DIFF_CHARS: ${{ vars.MAX_DIFF_CHARS }}
+        run: >
+          python scripts/pr-review/claude_pr_review.py
+          "${{ github.repository_owner }}"
+          "${{ github.event.repository.name }}"
+          "${{ github.event.pull_request.number }}"
+          --post-comment
